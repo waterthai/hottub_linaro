@@ -3,9 +3,9 @@ import time
 from urllib.request import urlopen
 import json
 import sys
-sys.path.append('/home/linaro/hottub_ma/setting/')
+sys.path.append('/home/linaro/hottub_linaro/setting/')
 from path_url import Path_url
-sys.path.append('/home/linaro/hottub_ma/relay/')
+sys.path.append('/home/linaro/hottub_linaro/relay/')
 from modbus_relay import Modbus_relay
 
 path_url = Path_url()
@@ -50,7 +50,7 @@ class Main_PLC():
 
 
         if data_json[0]['sm_filtration'] == "1":
-            write_status_auto = open('/home/linaro/hottub_ma/txt_file/status_working_auto.txt','w')
+            write_status_auto = open('/home/linaro/hottub_linaro/txt_file/status_working_auto.txt','w')
             write_status_auto.write("False")
             if status_plc_out[0] == False:
                 mod.start_filtration()
@@ -128,7 +128,7 @@ class Main_PLC():
                     mod.stop_chauffage()
 
     def auto_filtration_working(self, data_time_status,status_plc_out, data_json, data_setting):
-        write_status_auto = open('/home/linaro/hottub_ma/txt_file/status_working_auto.txt','w')
+        write_status_auto = open('/home/linaro/hottub_linaro/txt_file/status_working_auto.txt','w')
         write_status_auto.write("True")
         if str(data_time_status) != "0":
             if status_plc_out[0] == False:
@@ -154,7 +154,7 @@ class Main_PLC():
                     self.close_ozone_choc()
             elif str(data_json[0]['sm_ozone_choc']) == "0":
                 self.close_ozone_choc()
-            read_status_heater = open('/home/linaro/hottub_ma/txt_file/status_working_heater.txt','r')
+            read_status_heater = open('/home/linaro/hottub_linaro/txt_file/status_working_heater.txt','r')
             set_heater_text = read_status_heater.read().rstrip('\n')
             print("xxxxxxxxxxx"+str(set_heater_text))
             if str(set_heater_text) == "False":

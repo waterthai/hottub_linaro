@@ -1,7 +1,7 @@
 import minimalmodbus
 import serial
 import sys
-sys.path.append('/home/linaro/hottub_ma/setting/')
+sys.path.append('/home/linaro/hottub_linaro/setting/')
 from path_url import Path_url
 
 path_url = Path_url()

@@ -2,7 +2,7 @@ from modbus_relay import Modbus_relay
 from urllib.request import urlopen
 import json
 import sys
-sys.path.append('/home/linaro/hottub_ma/setting/')
+sys.path.append('/home/linaro/hottub_linaro/setting/')
 from path_url import Path_url
 
 path_url = Path_url()
@@ -23,7 +23,7 @@ class Main_relay():
         data_json = json.loads(response.read())
         if self.status_filtration ==  True: 
             if str(data_json[0]['sm_filtration']) != "0":
-                read_status_auto = open('/home/linaro/hottub_ma/txt_file/status_working_auto.txt','r')
+                read_status_auto = open('/home/linaro/hottub_linaro/txt_file/status_working_auto.txt','r')
                 status_read_filtration_auto = read_status_auto.read().rstrip('\n')
                 if status_read_filtration_auto == "False":
                     if str(data_json[0]['sm_ozone_choc']) == "1":

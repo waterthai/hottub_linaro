@@ -2,11 +2,11 @@ import json
 import sys
 from urllib.request import urlopen
 from modbus_heater import Modbus_heatpump
-sys.path.append('/home/linaro/hottub_ma/relay/')
+sys.path.append('/home/linaro/hottub_linaro/relay/')
 from modbus_relay import Modbus_relay
-sys.path.append('/home/linaro/hottub_ma/setting/')
+sys.path.append('/home/linaro/hottub_linaro/setting/')
 from path_url import Path_url
-sys.path.append('/home/linaro/hottub_ma/plc/')
+sys.path.append('/home/linaro/hottub_linaro/plc/')
 from modbus import Modbus
 
 
@@ -41,13 +41,13 @@ class Main_Heater():
                     # minus = float(data_setting[0]['setting_temperature']) - float(data_setting[0]['setting_temp_deff'])
                     if  float(data_setting[0]['setting_temperature']) - float(data_setting[0]['setting_temp_deff']) >=  float(temperature):
                         print("เปิดปั้ม")
-                        read_status_auto = open('/home/linaro/hottub_ma/txt_file/status_working_heater.txt','w')
+                        read_status_auto = open('/home/linaro/hottub_linaro/txt_file/status_working_heater.txt','w')
                         read_status_auto.write("True")
                         if plc[2] == False:
                             mod_heatpump.start_chauffage()
                     elif float(temperature) >= float(data_setting[0]['setting_temperature']): 
                         print("ปิดปั้ม")
-                        read_status_auto = open('/home/linaro/hottub_ma/txt_file/status_working_heater.txt','w')
+                        read_status_auto = open('/home/linaro/hottub_linaro/txt_file/status_working_heater.txt','w')
                         read_status_auto.write("False")
                         if plc[2] == True:
                             mod_heatpump.stop_chauffage()
@@ -59,29 +59,29 @@ class Main_Heater():
                     print(temp_div)
                     print(read)
                     if float(data_setting[0]['setting_temperature']) - float(data_setting[0]['setting_temp_deff']) >  float(temperature):
-                        read_status_auto = open('/home/linaro/hottub_ma/txt_file/status_working_heater.txt','w')
+                        read_status_auto = open('/home/linaro/hottub_linaro/txt_file/status_working_heater.txt','w')
                         read_status_auto.write("True")
                         if plc[0] == False:
                             plc_mod.start_filtration()
                     else :
                         print("ปิดปั้ม")
-                        read_status_auto = open('/home/linaro/hottub_ma/txt_file/status_working_heater.txt','w')
+                        read_status_auto = open('/home/linaro/hottub_linaro/txt_file/status_working_heater.txt','w')
                         read_status_auto.write("False")
                         if plc[2] == True:
                             mod_heatpump.stop_chauffage()
                 else:
-                    read_status_auto = open('/home/linaro/hottub_ma/txt_file/status_working_heater.txt','w')
+                    read_status_auto = open('/home/linaro/hottub_linaro/txt_file/status_working_heater.txt','w')
                     read_status_auto.write("False")
                     if plc[2] == True:
                         mod_heatpump.stop_chauffage()
             else:
-                read_status_auto = open('/home/linaro/hottub_ma/txt_file/status_working_heater.txt','w')
+                read_status_auto = open('/home/linaro/hottub_linaro/txt_file/status_working_heater.txt','w')
                 read_status_auto.write("False")
                 if plc[2] == True:
                     mod_heatpump.stop_chauffage()
 
         else:
-            read_status_auto = open('/home/linaro/hottub_ma/txt_file/status_working_heater.txt','w')
+            read_status_auto = open('/home/linaro/hottub_linaro/txt_file/status_working_heater.txt','w')
             read_status_auto.write("False")
             if plc[2] == True:
                 mod_heatpump.stop_chauffage()
