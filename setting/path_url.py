@@ -11,6 +11,7 @@ class Path_url ():
     url_chlorine = "http://localhost/api/Rest_api/get_chlorine"
     url_selection = "http://localhost/api/Rest_api/get_machine_option"
     url_heatpump =  "http://localhost/api/Rest_api/get_heatpump"
+    url_night_time =  "http://localhost/api/Rest_api/get_night_time_mode"
     # modbus_port = "/dev/tty.usbserial-110"
     # modbus_port = "/dev/ttyUSB_DEVICE1"
     #modbus_port = "/dev/ttyUSB0"

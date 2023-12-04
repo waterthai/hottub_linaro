@@ -42,6 +42,7 @@ url_setting = path_url.url_setting
 url_setting_mode = path_url.url_setting_mode
 url_selection = path_url.url_selection
 url_heatpump = path_url.url_heatpump
+url_night_time =  path_url.url_night_time
 
 try:
     while True:
@@ -68,6 +69,14 @@ try:
         hour_end_heatpump = setting_heatpump[0]['heatpump_end']
         heatpump_split_hour_start = hour_start_heatpump.split(':')
         heatpump_split_hour_end = hour_end_heatpump.split(':')
+
+        #night time setting url
+        response_night_time = urlopen(url_night_time)
+        setting_night_time = json.loads(response_night_time.read())
+        hour_start_night_time = setting_night_time[0]['night_time_start']
+        hour_end_night_time = setting_night_time[0]['night_time_end']
+        night_time_split_start = hour_start_night_time.split(':')
+        night_time_split_end = hour_end_night_time.split(':')
 
         read_pressure =  modbus_read.read_pressure()
 
@@ -105,13 +114,71 @@ try:
         split_set_pressure = set_pressure_text.split(",")
         print("xxxxxxxxxx"+str(plc_in[2]))
         #check nighttime swicth
-        if plc_in[2] == False:
-            if int(current_hour) < 21 and int(current_hour) > 7 : 
-                print("in of time")
-                #check bypass mode
-                if str(setting_mode[0]['sm_bypass']) == "0":
-                    count_down = open('/home/linaro/hottub_linaro/txt_file/count_down_close_system.txt','r')
-                    if count_down.read() == '':    
+        if str(setting_night_time[0]['night_time_enable']) == "0":
+            if plc_in[2] == False:
+                if int(current_hour) < 21 and int(current_hour) > 7 : 
+                    print("in of time")
+                    #check bypass mode
+                    if str(setting_mode[0]['sm_bypass']) == "0":
+                        count_down = open('/home/linaro/hottub_linaro/txt_file/count_down_close_system.txt','r')
+                        if count_down.read() == '':    
+                            besgo.start_besgo(current_time, relay_8, plc, setting_mode)
+                            if relay_8[4] == True:
+                                if int(setting_selection[0]['heat_pump_heater']) == 1 or int(setting_selection[0]['heat_pump_cooling']) == 1 or  int(setting_selection[0]['heat_pump_all']) == 1:
+                                    if int(current_hour) >= int(heatpump_split_hour_start[0])  and int(current_hour) < int(heatpump_split_hour_end[0]) :
+                                        main_heatpump.start_heatpump(temperature, plc, relay_8)
+                                    else:
+                                        heater.start_heater(temperature, plc, relay_8)
+                                else:
+                                    heater.start_heater(temperature, plc, relay_8)
+
+                            if str(status_bes) == "False":
+                                main_plc = Main_PLC(current_time, temperature, plc, relay_8)
+                                main_plc.start_plc()
+
+                                main_relay = Main_relay(relay_8, plc[0])
+                                main_relay.start_relay()
+                                
+                                main_ph = Main_PH(current_time, ph, orp, relay_8)
+                                if plc[0] == True:
+                                    main_ph.start_ph()
+
+                                if int(setting_selection[0]['heat_pump_heater']) == 1 or int(setting_selection[0]['heat_pump_cooling']) == 1 or  int(setting_selection[0]['heat_pump_all']) == 1:
+                                    if int(current_hour) >= int(heatpump_split_hour_start[0])  and int(current_hour) < int(heatpump_split_hour_end[0]) :
+                                        main_heatpump.start_heatpump(temperature, plc, relay_8)
+                                    else:
+                                        heater.start_heater(temperature, plc, relay_8)
+                                else:
+                                    heater.start_heater(temperature, plc, relay_8)
+
+                                #นับเวลาตรวจสอบ pressure ไม่มีแรงดัน
+                                if plc[0] == True and relay_8[4] == False:
+                                    if float(split_set_pressure[0]) > float(read_pressure):
+                                        counter_pressure = counter_pressure + 1
+                                        print('xxxxxxxpressure counterxxxxxxxx'+str(counter_pressure))
+                                        if counter_pressure == int(split_set_pressure[1]) :
+                                            minus_hour = int(current_hour) + int(split_set_pressure[2])
+                                            set_new_time = str(minus_hour)+':'+str(sec_time)
+                                            write_file.write_over_presssure(set_new_time)
+
+                                    
+                        else:
+                            print("close Anoter Time")
+                            close_all.start_close_plc(plc)
+                            if plc[0] == False:
+                                main_relay = Main_relay(relay_8, plc[0])
+                                main_relay.start_relay()
+
+                            
+                        time.sleep(0.5)
+                        volt.start_volt(setting_selection)
+                            
+                        
+                    else:
+                        count_down = open('/home/linaro/hottub_linaro/txt_file/count_down_close_system.txt','r')
+                        if count_down.read() != '':
+                            write_file.clear_pressure_time()
+                            counter_pressure = 0
                         besgo.start_besgo(current_time, relay_8, plc, setting_mode)
                         if relay_8[4] == True:
                             if int(setting_selection[0]['heat_pump_heater']) == 1 or int(setting_selection[0]['heat_pump_cooling']) == 1 or  int(setting_selection[0]['heat_pump_all']) == 1:
@@ -128,7 +195,50 @@ try:
 
                             main_relay = Main_relay(relay_8, plc[0])
                             main_relay.start_relay()
+
+                            main_ph = Main_PH(current_time, ph, orp, relay_8)
+                            if plc[0] == True:
+                                main_ph.start_ph()
+                            if int(setting_selection[0]['heat_pump_heater']) == 1 or int(setting_selection[0]['heat_pump_cooling']) == 1 or  int(setting_selection[0]['heat_pump_all']) == 1:
+                                if int(current_hour) >= int(heatpump_split_hour_start[0])  and int(current_hour) < int(heatpump_split_hour_end[0]) :
+                                    main_heatpump.start_heatpump(temperature, plc, relay_8)
+                                else:
+                                    heater.start_heater(temperature, plc, relay_8)
+                            else:
+                                heater.start_heater(temperature, plc, relay_8)
                             
+                        time.sleep(0.5)
+                        volt.start_volt(setting_selection)
+                else:
+                    print("out of time")
+                    close_all.start_close_plc(plc)
+                    if plc[0] == False:
+                        main_relay = Main_relay(relay_8, plc[0])
+                        main_relay.start_relay()
+                    time.sleep(0.5)
+            else:
+                print("PLC NOT FALSE"+str(relay_8[4]))
+                #check bypass mode
+                if str(setting_mode[0]['sm_bypass']) == "0":
+                    count_down = open('/home/linaro/hottub_linaro/txt_file/count_down_close_system.txt','r')
+                    if count_down.read() == '':
+                        besgo.start_besgo(current_time, relay_8, plc, setting_mode)
+                        if relay_8[4] == True:
+                            if int(setting_selection[0]['heat_pump_heater']) == 1 or int(setting_selection[0]['heat_pump_cooling']) == 1 or  int(setting_selection[0]['heat_pump_all']) == 1:
+                                if int(current_hour) >= int(heatpump_split_hour_start[0])  and int(current_hour) < int(heatpump_split_hour_end[0]) :
+                                    main_heatpump.start_heatpump(temperature, plc, relay_8)
+                                else:
+                                    heater.start_heater(temperature, plc, relay_8)
+                            else:
+                                heater.start_heater(temperature, plc, relay_8)
+                        
+                        if str(status_bes) == "False":
+                            main_plc = Main_PLC(current_time, temperature, plc, relay_8)
+                            main_plc.start_plc()
+
+                            main_relay = Main_relay(relay_8, plc[0])
+                            main_relay.start_relay()
+
                             main_ph = Main_PH(current_time, ph, orp, relay_8)
                             if plc[0] == True:
                                 main_ph.start_ph()
@@ -140,8 +250,6 @@ try:
                                     heater.start_heater(temperature, plc, relay_8)
                             else:
                                 heater.start_heater(temperature, plc, relay_8)
-
-                            #นับเวลาตรวจสอบ pressure ไม่มีแรงดัน
                             if plc[0] == True and relay_8[4] == False:
                                 if float(split_set_pressure[0]) > float(read_pressure):
                                     counter_pressure = counter_pressure + 1
@@ -150,10 +258,7 @@ try:
                                         minus_hour = int(current_hour) + int(split_set_pressure[2])
                                         set_new_time = str(minus_hour)+':'+str(sec_time)
                                         write_file.write_over_presssure(set_new_time)
-
-                                
                     else:
-                        print("close Anoter Time")
                         close_all.start_close_plc(plc)
                         if plc[0] == False:
                             main_relay = Main_relay(relay_8, plc[0])
@@ -162,13 +267,14 @@ try:
                         
                     time.sleep(0.5)
                     volt.start_volt(setting_selection)
+                            
                         
-                    
                 else:
                     count_down = open('/home/linaro/hottub_linaro/txt_file/count_down_close_system.txt','r')
                     if count_down.read() != '':
                         write_file.clear_pressure_time()
                         counter_pressure = 0
+
                     besgo.start_besgo(current_time, relay_8, plc, setting_mode)
                     if relay_8[4] == True:
                         if int(setting_selection[0]['heat_pump_heater']) == 1 or int(setting_selection[0]['heat_pump_cooling']) == 1 or  int(setting_selection[0]['heat_pump_all']) == 1:
@@ -178,7 +284,6 @@ try:
                                 heater.start_heater(temperature, plc, relay_8)
                         else:
                             heater.start_heater(temperature, plc, relay_8)
-
                     if str(status_bes) == "False":
                         main_plc = Main_PLC(current_time, temperature, plc, relay_8)
                         main_plc.start_plc()
@@ -199,6 +304,100 @@ try:
                         
                     time.sleep(0.5)
                     volt.start_volt(setting_selection)
+        else:
+            if int(current_hour) < int(night_time_split_start[0]) and int(current_hour) > int(night_time_split_end[0]) : 
+                    print("in of time")
+                    #check bypass mode
+                    if str(setting_mode[0]['sm_bypass']) == "0":
+                        count_down = open('/home/linaro/hottub_linaro/txt_file/count_down_close_system.txt','r')
+                        if count_down.read() == '':    
+                            besgo.start_besgo(current_time, relay_8, plc, setting_mode)
+                            if relay_8[4] == True:
+                                if int(setting_selection[0]['heat_pump_heater']) == 1 or int(setting_selection[0]['heat_pump_cooling']) == 1 or  int(setting_selection[0]['heat_pump_all']) == 1:
+                                    if int(current_hour) >= int(heatpump_split_hour_start[0])  and int(current_hour) < int(heatpump_split_hour_end[0]) :
+                                        main_heatpump.start_heatpump(temperature, plc, relay_8)
+                                    else:
+                                        heater.start_heater(temperature, plc, relay_8)
+                                else:
+                                    heater.start_heater(temperature, plc, relay_8)
+
+                            if str(status_bes) == "False":
+                                main_plc = Main_PLC(current_time, temperature, plc, relay_8)
+                                main_plc.start_plc()
+
+                                main_relay = Main_relay(relay_8, plc[0])
+                                main_relay.start_relay()
+                                
+                                main_ph = Main_PH(current_time, ph, orp, relay_8)
+                                if plc[0] == True:
+                                    main_ph.start_ph()
+
+                                if int(setting_selection[0]['heat_pump_heater']) == 1 or int(setting_selection[0]['heat_pump_cooling']) == 1 or  int(setting_selection[0]['heat_pump_all']) == 1:
+                                    if int(current_hour) >= int(heatpump_split_hour_start[0])  and int(current_hour) < int(heatpump_split_hour_end[0]) :
+                                        main_heatpump.start_heatpump(temperature, plc, relay_8)
+                                    else:
+                                        heater.start_heater(temperature, plc, relay_8)
+                                else:
+                                    heater.start_heater(temperature, plc, relay_8)
+
+                                #นับเวลาตรวจสอบ pressure ไม่มีแรงดัน
+                                if plc[0] == True and relay_8[4] == False:
+                                    if float(split_set_pressure[0]) > float(read_pressure):
+                                        counter_pressure = counter_pressure + 1
+                                        print('xxxxxxxpressure counterxxxxxxxx'+str(counter_pressure))
+                                        if counter_pressure == int(split_set_pressure[1]) :
+                                            minus_hour = int(current_hour) + int(split_set_pressure[2])
+                                            set_new_time = str(minus_hour)+':'+str(sec_time)
+                                            write_file.write_over_presssure(set_new_time)
+
+                                    
+                        else:
+                            print("close Anoter Time")
+                            close_all.start_close_plc(plc)
+                            if plc[0] == False:
+                                main_relay = Main_relay(relay_8, plc[0])
+                                main_relay.start_relay()
+
+                            
+                        time.sleep(0.5)
+                        volt.start_volt(setting_selection)
+                            
+                        
+                    else:
+                        count_down = open('/home/linaro/hottub_linaro/txt_file/count_down_close_system.txt','r')
+                        if count_down.read() != '':
+                            write_file.clear_pressure_time()
+                            counter_pressure = 0
+                        besgo.start_besgo(current_time, relay_8, plc, setting_mode)
+                        if relay_8[4] == True:
+                            if int(setting_selection[0]['heat_pump_heater']) == 1 or int(setting_selection[0]['heat_pump_cooling']) == 1 or  int(setting_selection[0]['heat_pump_all']) == 1:
+                                if int(current_hour) >= int(heatpump_split_hour_start[0])  and int(current_hour) < int(heatpump_split_hour_end[0]) :
+                                    main_heatpump.start_heatpump(temperature, plc, relay_8)
+                                else:
+                                    heater.start_heater(temperature, plc, relay_8)
+                            else:
+                                heater.start_heater(temperature, plc, relay_8)
+
+                        if str(status_bes) == "False":
+                            main_plc = Main_PLC(current_time, temperature, plc, relay_8)
+                            main_plc.start_plc()
+
+                            main_relay = Main_relay(relay_8, plc[0])
+                            main_relay.start_relay()
+
+                            main_ph = Main_PH(current_time, ph, orp, relay_8)
+                            if plc[0] == True:
+                                main_ph.start_ph()
+                            if int(setting_selection[0]['heat_pump_heater']) == 1 or int(setting_selection[0]['heat_pump_cooling']) == 1 or  int(setting_selection[0]['heat_pump_all']) == 1:
+                                if int(current_hour) >= int(heatpump_split_hour_start[0])  and int(current_hour) < int(heatpump_split_hour_end[0]) :
+                                    main_heatpump.start_heatpump(temperature, plc, relay_8)
+                                else:
+                                    heater.start_heater(temperature, plc, relay_8)
+                            else:
+                                heater.start_heater(temperature, plc, relay_8)
+                            
+                        time.sleep(0.5)
+                        volt.start_volt(setting_selection)
             else:
                 print("out of time")
                 close_all.start_close_plc(plc)
@@ -206,94 +405,8 @@ try:
                     main_relay = Main_relay(relay_8, plc[0])
                     main_relay.start_relay()
                 time.sleep(0.5)
-        else:
-            print("PLC NOT FALSE"+str(relay_8[4]))
-            #check bypass mode
-            if str(setting_mode[0]['sm_bypass']) == "0":
-                count_down = open('/home/linaro/hottub_linaro/txt_file/count_down_close_system.txt','r')
-                if count_down.read() == '':
-                    besgo.start_besgo(current_time, relay_8, plc, setting_mode)
-                    if relay_8[4] == True:
-                        if int(setting_selection[0]['heat_pump_heater']) == 1 or int(setting_selection[0]['heat_pump_cooling']) == 1 or  int(setting_selection[0]['heat_pump_all']) == 1:
-                            if int(current_hour) >= int(heatpump_split_hour_start[0])  and int(current_hour) < int(heatpump_split_hour_end[0]) :
-                                main_heatpump.start_heatpump(temperature, plc, relay_8)
-                            else:
-                                heater.start_heater(temperature, plc, relay_8)
-                        else:
-                            heater.start_heater(temperature, plc, relay_8)
-                    
-                    if str(status_bes) == "False":
-                        main_plc = Main_PLC(current_time, temperature, plc, relay_8)
-                        main_plc.start_plc()
+            
 
-                        main_relay = Main_relay(relay_8, plc[0])
-                        main_relay.start_relay()
-
-                        main_ph = Main_PH(current_time, ph, orp, relay_8)
-                        if plc[0] == True:
-                            main_ph.start_ph()
-
-                        if int(setting_selection[0]['heat_pump_heater']) == 1 or int(setting_selection[0]['heat_pump_cooling']) == 1 or  int(setting_selection[0]['heat_pump_all']) == 1:
-                            if int(current_hour) >= int(heatpump_split_hour_start[0])  and int(current_hour) < int(heatpump_split_hour_end[0]) :
-                                main_heatpump.start_heatpump(temperature, plc, relay_8)
-                            else:
-                                heater.start_heater(temperature, plc, relay_8)
-                        else:
-                            heater.start_heater(temperature, plc, relay_8)
-                        if plc[0] == True and relay_8[4] == False:
-                            if float(split_set_pressure[0]) > float(read_pressure):
-                                counter_pressure = counter_pressure + 1
-                                print('xxxxxxxpressure counterxxxxxxxx'+str(counter_pressure))
-                                if counter_pressure == int(split_set_pressure[1]) :
-                                    minus_hour = int(current_hour) + int(split_set_pressure[2])
-                                    set_new_time = str(minus_hour)+':'+str(sec_time)
-                                    write_file.write_over_presssure(set_new_time)
-                else:
-                    close_all.start_close_plc(plc)
-                    if plc[0] == False:
-                        main_relay = Main_relay(relay_8, plc[0])
-                        main_relay.start_relay()
-
-                    
-                time.sleep(0.5)
-                volt.start_volt(setting_selection)
-                        
-                    
-            else:
-                count_down = open('/home/linaro/hottub_linaro/txt_file/count_down_close_system.txt','r')
-                if count_down.read() != '':
-                    write_file.clear_pressure_time()
-                    counter_pressure = 0
-
-                besgo.start_besgo(current_time, relay_8, plc, setting_mode)
-                if relay_8[4] == True:
-                    if int(setting_selection[0]['heat_pump_heater']) == 1 or int(setting_selection[0]['heat_pump_cooling']) == 1 or  int(setting_selection[0]['heat_pump_all']) == 1:
-                        if int(current_hour) >= int(heatpump_split_hour_start[0])  and int(current_hour) < int(heatpump_split_hour_end[0]) :
-                            main_heatpump.start_heatpump(temperature, plc, relay_8)
-                        else:
-                            heater.start_heater(temperature, plc, relay_8)
-                    else:
-                        heater.start_heater(temperature, plc, relay_8)
-                if str(status_bes) == "False":
-                    main_plc = Main_PLC(current_time, temperature, plc, relay_8)
-                    main_plc.start_plc()
-
-                    main_relay = Main_relay(relay_8, plc[0])
-                    main_relay.start_relay()
-
-                    main_ph = Main_PH(current_time, ph, orp, relay_8)
-                    if plc[0] == True:
-                        main_ph.start_ph()
-                    if int(setting_selection[0]['heat_pump_heater']) == 1 or int(setting_selection[0]['heat_pump_cooling']) == 1 or  int(setting_selection[0]['heat_pump_all']) == 1:
-                        if int(current_hour) >= int(heatpump_split_hour_start[0])  and int(current_hour) < int(heatpump_split_hour_end[0]) :
-                            main_heatpump.start_heatpump(temperature, plc, relay_8)
-                        else:
-                            heater.start_heater(temperature, plc, relay_8)
-                    else:
-                        heater.start_heater(temperature, plc, relay_8)
-                    
-                time.sleep(0.5)
-                volt.start_volt(setting_selection)
 except:
     restart_programs()
 
