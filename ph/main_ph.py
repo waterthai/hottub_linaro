@@ -161,8 +161,9 @@ class Main_PH():
             if (int(orp_json[0]['orp_freq'])) == modbus_orp.read_orp_counter() :
                 modbus_orp.set_orp_counter_zero()
         elif float(read_orp) >= float(orp_json[0]['orp_lower']):
-            if relay8[5] == True:
+            if relay8[6] == True:
                 modbus_orp.stop_orp()
+        
 
     def process_apf(self, apf_json,relay8):
         relay8 = relay8
