@@ -52,9 +52,7 @@ class Main_Besgo():
             print("backwash AUTO")
             for i in range(len(besgo_json)):
                 for j in range(len(besgo_json[i][0])):
-                    print("xxxxxxxxxxxx"+besgo_json[i][0][j])
-                    print("xxxxxxxxxxxx"+day.upper())
-                    print("xxxxxxxxxxxx"+current_time)
+
                     if besgo_json[i][0][j] == day.upper():
                         time_split = besgo_json[i][1].split('-')  
                         print(time_split[0])         
