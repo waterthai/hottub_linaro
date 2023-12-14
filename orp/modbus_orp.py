@@ -31,15 +31,17 @@ class Modbus_ORP():
         # self.send.write(b"\x02\x05\x00\x06\x00\x00\x2D\xF8")
 
     def read_orp_counter(self):
-        read_orp = open('./orp/txt_file/counter_orp.txt','r')
+        read_orp = open('/home/linaro/hottub_linaro/orp/txt_file/counter_orp.txt','r')
         return int(read_orp.read())
     
     def write_orp_counter(self):
         counter_orp = self.read_orp_counter()
         counter_orp += 1
-        write_orp = open('./orp/txt_file/counter_orp.txt','w')
-        write_orp.write(str(counter_orp))
+        with open('/home/linaro/hottub_linaro/orp/txt_file/counter_orp.txt','w') as write_orp:
+            write_orp.write(str(counter_orp))
+            write_orp.close()
     def set_orp_counter_zero(self):
-        write_orp = open('./orp/txt_file/counter_orp.txt','w')
-        write_orp.write(str(0))
+        with open('/home/linaro/hottub_linaro/orp/txt_file/counter_orp.txt','w') as write_orp:
+            write_orp.write(str(0))
+            write_orp.close()
 

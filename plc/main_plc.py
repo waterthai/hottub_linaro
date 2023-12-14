@@ -50,8 +50,9 @@ class Main_PLC():
 
 
         if data_json[0]['sm_filtration'] == "1":
-            write_status_auto = open('/home/linaro/hottub_linaro/txt_file/status_working_auto.txt','w')
-            write_status_auto.write("False")
+            with open('/home/linaro/hottub_linaro/txt_file/status_working_auto.txt','w') as write_status_auto:
+                write_status_auto.write("False")
+                write_status_auto.close()
             if status_plc_out[0] == False:
                 mod.start_filtration()
                 self.pompe_ozone_and_chauffage(status_plc_out, data_json, data_setting)
@@ -128,8 +129,9 @@ class Main_PLC():
                     mod.stop_chauffage()
 
     def auto_filtration_working(self, data_time_status,status_plc_out, data_json, data_setting):
-        write_status_auto = open('/home/linaro/hottub_linaro/txt_file/status_working_auto.txt','w')
-        write_status_auto.write("True")
+        with open('/home/linaro/hottub_linaro/txt_file/status_working_auto.txt','w') as write_status_auto:
+            write_status_auto.write("True")
+            write_status_auto.close()
         if str(data_time_status) != "0":
             if status_plc_out[0] == False:
                 mod.start_filtration()

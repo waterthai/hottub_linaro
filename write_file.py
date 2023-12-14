@@ -4,36 +4,45 @@ class Write_file():
 
     def start_write(self, relay_8, plc_status, temperature, ph, orp, pressure, plc_in):
         print("writefile open")
-        relay_file = open('/home/linaro/hottub_linaro/txt_file/status_relay_8.txt','w')
-        relay_file.write(str(relay_8))
+        with open('/home/linaro/hottub_linaro/txt_file/status_relay_8.txt','w') as relay_file:
+            relay_file.write(str(relay_8))
+            relay_file.close()
 
-        plc_file = open('/home/linaro/hottub_linaro/txt_file/status_plc.txt','w')
-        plc_file.write(str(plc_status))
+        with open('/home/linaro/hottub_linaro/txt_file/status_plc.txt','w') as plc_file:
+            plc_file.write(str(plc_status))
+            plc_file.close()
 
-        plc_file_in = open('/home/linaro/hottub_linaro/txt_file/status_plc_in.txt','w')
-        plc_file_in.write(str(plc_in))
+        with open('/home/linaro/hottub_linaro/txt_file/status_plc_in.txt','w') as plc_file_in:
+            plc_file_in.write(str(plc_in))
+            plc_file_in.close()
 
-        temperature_file = open('/home/linaro/hottub_linaro/txt_file/temperature.txt','w')
-        temperature_file.write(str(temperature))
+        with open('/home/linaro/hottub_linaro/txt_file/temperature.txt','w') as temperature_file:
+            temperature_file.write(str(temperature))
+            temperature_file.close()
 
 
-        ph_file = open('/home/linaro/hottub_linaro/txt_file/ph.txt','w')
-        ph_file.write(str(ph))
+        with open('/home/linaro/hottub_linaro/txt_file/ph.txt','w') as ph_file:
+            ph_file.write(str(ph))
+            ph_file.close()
         
-        orp_file = open('/home/linaro/hottub_linaro/txt_file/orp.txt','w')
-        orp_file.write(str(orp))
+        with open('/home/linaro/hottub_linaro/txt_file/orp.txt','w') as orp_file:
+            orp_file.write(str(orp))
+            orp_file.close()
 
-        pressure_file = open('/home/linaro/hottub_linaro/txt_file/pressure.txt','w')
-        pressure_file.write(str(pressure))
+        with open('/home/linaro/hottub_linaro/txt_file/pressure.txt','w') as pressure_file:
+            pressure_file.write(str(pressure))
+            pressure_file.close()
         print("writefile close")
 
     def write_over_presssure(self,pressure):
         print("writefile pressure open")
-        pressure_file = open('/home/linaro/hottub_linaro/txt_file/count_down_close_system.txt','w')
-        pressure_file.write(str(pressure))
+        with open('/home/linaro/hottub_linaro/txt_file/count_down_close_system.txt','w') as pressure_file:
+            pressure_file.write(str(pressure))
+            pressure_file.close()
         print("writefile pressure close")
 
     def clear_pressure_time(self):
-        count_down_read = open('/home/linaro/hottub_linaro/txt_file/count_down_close_system.txt','w')
-        count_down_read.write('')
+        with open('/home/linaro/hottub_linaro/txt_file/count_down_close_system.txt','w') as count_down_read:
+            count_down_read.write('')
+            count_down_read.close()
 

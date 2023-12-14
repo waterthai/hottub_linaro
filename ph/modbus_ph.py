@@ -39,8 +39,10 @@ class Modbus_PH():
     def write_ph_counter(self):
         counter_ph = self.read_ph_counter()
         counter_ph += 1
-        write_ph = open('./ph/txt_file/counter_ph.txt','w')
-        write_ph.write(str(counter_ph))
+        with open('/home/linaro/hottub_linaro/ph/txt_file/counter_ph.txt','w') as write_ph:
+            write_ph.write(str(counter_ph))
+            write_ph.close()
     def set_ph_counter_zero(self):
-        write_ph = open('./ph/txt_file/counter_ph.txt','w')
-        write_ph.write(str(0))
+        with open('/home/linaro/hottub_linaro/ph/txt_file/counter_ph.txt','w') as write_ph:
+            write_ph.write(str(0))
+            write_ph.close()

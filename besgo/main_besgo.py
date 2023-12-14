@@ -38,8 +38,9 @@ class Main_Besgo():
         plc_read = set_plc_out
         print("--------Besgo-------"+str(besgo_setting_json[0]['backwash_mode']))
         if str(besgo_setting_json[0]['backwash_mode']) == "1":
-            write_status_besgo = open('/home/linaro/hottub_linaro/txt_file/status_besgo.txt','w')
-            write_status_besgo.write("True")
+            with open('/home/linaro/hottub_linaro/txt_file/status_besgo.txt','w') as write_status_besgo:
+                write_status_besgo.write("True")
+                write_status_besgo.close()
             if plc_read[0] == False:
                 mod_plc.start_filtration()
             if relay8[4] == False and plc_read[0] == True:
@@ -67,9 +68,12 @@ class Main_Besgo():
                                         mod_besgo.open_besgo()
                                         self.counter_besgo_working = self.counter_besgo_working + 1
                                         self.set_time_working = current_time
-                                        write_status_besgo = open('/home/linaro/hottub_linaro/txt_file/status_besgo.txt','w')
-                                        write_status_besgo.write("True")
+                                        with open('/home/linaro/hottub_linaro/txt_file/status_besgo.txt','w') as write_status_besgo:
+                                            write_status_besgo.write("True")
+                                            write_status_besgo.close()
                                         self.status_working = "working"
+                                if relay8[4] == True:
+                                    mod_besgo.close_all_working(relay8)
                                 # if relay8[4] == True:
                                 #     if int(besgo_setting_json[0]['backwash_time']) >= self.counter_besgo_working:
                                 #         self.counter_besgo_working =  self.counter_besgo_working + 1
@@ -83,8 +87,9 @@ class Main_Besgo():
                                 print("ไม่ทำงาน besgo")
                                 if relay8[4] == True:
                                     mod_besgo.close_besgo()
-                                write_status_besgo = open('/home/linaro/hottub_linaro/txt_file/status_besgo.txt','w')
-                                write_status_besgo.write("False")
+                                with open('/home/linaro/hottub_linaro/txt_file/status_besgo.txt','w') as write_status_besgo:
+                                    write_status_besgo.write("False")
+                                    write_status_besgo.close()
                                 self.counter_besgo_working = 0
                                 self.status_working = ""
                                   
@@ -94,8 +99,9 @@ class Main_Besgo():
             if int(setting_mode[0]['sm_filtration']) == 0:
                 if relay8[4] == False:
                     mod_plc.stop_filtration()
-            write_status_besgo = open('/home/linaro/hottub_linaro/txt_file/status_besgo.txt','w')
-            write_status_besgo.write("False")
+            with open('/home/linaro/hottub_linaro/txt_file/status_besgo.txt','w') as write_status_besgo:
+                write_status_besgo.write("False")
+                write_status_besgo.close()
     
 
        

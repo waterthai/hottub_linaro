@@ -124,8 +124,9 @@ try:
                 else:
                     count_down = open('./txt_file/count_down_close_system.txt','r')
                     if count_down.read() != '':
-                        count_down_read = open('./txt_file/count_down_close_system.txt','w')
-                        count_down_read.write('')
+                        with open('./txt_file/count_down_close_system.txt','w') as count_down_read:
+                            count_down_read.write('')
+                            count_down_read.close()
                         counter_pressure = 0
             
                     besgo.start_besgo(current_time, relay_8, plc, setting_mode)
@@ -153,8 +154,9 @@ try:
             else:
                 count_down = open('./txt_file/count_down_close_system.txt','r')
                 if count_down.read() != '':
-                    count_down_read = open('./txt_file/count_down_close_system.txt','w')
-                    count_down_read.write('')
+                    with open('./txt_file/count_down_close_system.txt','w') as count_down_read:
+                        count_down_read.write('')
+                        count_down_read.close()
                     counter_pressure = 0
         
                 besgo.start_besgo(current_time, relay_8, plc,setting_mode)
@@ -165,8 +167,9 @@ try:
         else:
             count_down = open('./txt_file/count_down_close_system.txt','r')
             if count_down.read() != '':
-                count_down_read = open('./txt_file/count_down_close_system.txt','w')
-                count_down_read.write('')
+                with open('./txt_file/count_down_close_system.txt','w') as count_down_read:
+                    count_down_read.write('')
+                    count_down_read.close()
                 counter_pressure = 0
 
             besgo.start_besgo(current_time, relay_8, plc)

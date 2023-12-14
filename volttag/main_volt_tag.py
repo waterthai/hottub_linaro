@@ -30,12 +30,14 @@ class Main_volt_tag():
             txt_set = volt_set+","+volt_set1+","+volt_set2
             # txt_set = "0,0,0"
 
-            open_volt = open("/home/linaro/hottub_linaro/txt_file/volt_tag.txt","w")
-            open_volt.write(str(txt_set))
+            with open("/home/linaro/hottub_linaro/txt_file/volt_tag.txt","w") as open_volt:
+                open_volt.write(str(txt_set))
+                open_volt.close()
         else:
             txt_set = "0,0,0"
-            open_volt = open("/home/linaro/hottub_linaro/txt_file/volt_tag.txt","w")
-            open_volt.write(str(txt_set))
+            with open("/home/linaro/hottub_linaro/txt_file/volt_tag.txt","w") as open_volt:
+                open_volt.write(str(txt_set))
+                open_volt.close()
 
 
 
